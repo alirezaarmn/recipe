@@ -15,12 +15,21 @@ EXPOSE 8000
 ARG DEV=false
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
+    # add postgres package 
+    apk add --update --no-cache postgresql-client && \ 
+    # --vertual sets a virtual dependency package, and groups the package we install into this name and then we can remove those packages later on inside 
+    # docker to make sure the docker is lightwight
+    apk add --update --no-cache --virtual .tmp-build-deps \
+    # these three packages will install inside the virtual that we just mentioned above
+    build-base postgresql-dev musl-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ $DEV = "true" ]; \
-    	then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
+    then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
     fi && \
     # remove the tmp content to get rid of unwanted files and make the image lightweight as much as possible
     rm -rf /tmp && \
+    # remove those packages that we install up there on line 24
+    apk del .tmp-build-deps && \
     # adding new user inside image, beacause it's practice not to use the root user
     # if don't specify this, the only user inside image will be root user
     adduser -D -H django-user
