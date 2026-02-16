@@ -1,3 +1,4 @@
+# `test_commands.py`
 ## Overview
 These tests verify the `wait_for_db` Django management command, which waits for the database to be available (useful in Docker). The tests use mocking to simulate database states without a real connection.
 
@@ -176,3 +177,28 @@ Attempt 6:
 
 #### Line 33: Verifying the final call
 `patched_check.assert_called_with(databases=['default'])`
+
+# `test_admin.py`
+## url = reverse('admin:core_user_changelist')
+`reverse()` turns a URL name (or namespaced name) into the actual URL path.
+**Without reverse:** You could hardcode something like url = `'/admin/core/user/'`. If you later change the admin URL prefix or the app name, every such string in the project breaks.
+**With reverse:** You write url = reverse('admin:core_user_changelist'). Django looks up that name in the URL configuration and returns the correct path (e.g. `/admin/core/user/`). If you change URLs in urls.py, the test still gets the right URL.
+**What the `:` means:** The colon is Django’s namespace separator for URL names.
+Left of : → namespace (which app/set of URLs).
+Right of : → URL name inside that namespace.
+So in `'admin:core_user_changelist'`:
+`admin` = namespace (Django’s admin app).
+`core_user_changelist` = name of the specific URL (the “user” model changelist in the core app).
+
+in `app/urls.py` you have this `path('admin/', admin.site.urls),`, the **path prefix** is `admin/`. if you change it to `  path('backend/', admin.site.urls),` :
+- The name you use in code stays the same: reverse('admin:core_user_changelist').
+- The result of reverse() changes automatically: it will now return something like /backend/core/user/ instead of /admin/core/user/.
+
+Quick reference
+
+| URL pattern                                    | reverse() call                                    |
+| ---------------------------------------------- | ------------------------------------------------- |
+| `path('list/', view, name='list')`             | `reverse('list')`                                 |
+| `path('item/<int:pk>/', view, name='item')`    | `reverse('item', kwargs={'pk': 1})`               |
+| `path('blog/<slug:slug>/', view, name='post')` | `reverse('post', kwargs={'slug': 'hello-world'})` |
+| `path('x/<int:a>/<int:b>/', view, name='x')`   | `reverse('x', kwargs={'a': 1, 'b': 2})`           |
