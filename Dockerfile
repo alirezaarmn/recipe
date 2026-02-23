@@ -15,13 +15,12 @@ EXPOSE 8000
 ARG DEV=false
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    # add postgres package 
-    apk add --update --no-cache postgresql-client && \ 
-    # --vertual sets a virtual dependency package, and groups the package we install into this name and then we can remove those packages later on inside 
-    # docker to make sure the docker is lightwight
+    # add postgres package and Pillow runtime (libjpeg.so); keep these in the image
+    apk add --update --no-cache postgresql-client libjpeg-turbo && \
+    # --virtual sets a virtual dependency package, and groups the package we install into this name and then we can remove those packages later on inside 
+    # docker to make sure the docker is lightweight
     apk add --update --no-cache --virtual .tmp-build-deps \
-    # these three packages will install inside the virtual that we just mentioned above
-    build-base postgresql-dev musl-dev && \
+    build-base postgresql-dev musl-dev zlib zlib-dev jpeg-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ $DEV = "true" ]; \
     then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
@@ -32,7 +31,11 @@ RUN python -m venv /py && \
     apk del .tmp-build-deps && \
     # adding new user inside image, beacause it's practice not to use the root user
     # if don't specify this, the only user inside image will be root user
-    adduser -D -H django-user
+    adduser -D -H django-user && \
+    mkdir -p /vol/static/media && \
+    mkdir -p /vol/web/static && \
+    chown -R django-user:django-user /vol/ && \
+    chown -R 755 /vol/web
 
 ENV PATH="/py/bin:$PATH"
 # specify the user we're switching to. so until we run this line, everythin else is being done as the root user 
