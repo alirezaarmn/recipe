@@ -38,7 +38,8 @@ class UserSerializer(serializers.ModelSerializer):
 # elsewhere—typically in a view (such as an API endpoint)
 # that uses this serializer. That view will:
 # 1. Use AuthTokenSerializer to validate the credentials.
-# 2. If valid, generate a token (using Django REST Framework's Token model or JWT).
+# 2. If valid, generate a token (using Django REST Framework's Token model
+#    or JWT).
 # 3. Return the token in the API response.
 
 

@@ -22,8 +22,9 @@ services:
       - DB_PASS=changeme
       - DEBUG=1
 
-    depends_on: # make sure that db service starts before the app service starts
-      - db 
+    depends_on: # make sure that db service starts before the app service starts 
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:13-alpine
@@ -33,6 +34,8 @@ services:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "devdb", "-U", "devuser"]
 
 volumes:
   dev-db-data: # use this to map a directory inside the running container

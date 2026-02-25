@@ -33,10 +33,10 @@ RUN python -m venv /py && \
     # adding new user inside image, beacause it's practice not to use the root user
     # if don't specify this, the only user inside image will be root user
     adduser -D -H django-user && \
-    mkdir -p /vol/static/media && \
+    mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
     chown -R django-user:django-user /vol/ && \
-    chown -R 755 /vol && \
+    chmod -R 755 /vol && \
     chmod -R +x /scripts
 
 ENV PATH="/scripts:/py/bin:$PATH"
